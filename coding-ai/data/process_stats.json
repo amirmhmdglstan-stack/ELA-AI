@@ -1,0 +1,51 @@
+{
+ "files_seen": 326049,
+ "kept": 177269,
+ "bytes_kept": 719658643,
+ "reasons": {
+  "too_short": 53613,
+  "low_alnum_ratio": 261,
+  "line_too_long": 4306,
+  "too_few_lines": 1217,
+  "secret": 203,
+  "generated_header": 4676,
+  "huge_config": 79,
+  "lines_too_short": 124,
+  "binary_or_control": 659,
+  "low_entropy": 153
+ },
+ "by_lang": {
+  "markdown": 103200131,
+  "yaml": 2382007,
+  "javascript": 67686162,
+  "python": 48285185,
+  "css": 2702708,
+  "html": 12653435,
+  "xml": 4012377,
+  "shell": 12986414,
+  "json": 9022252,
+  "toml": 1114524,
+  "sql": 8834523,
+  "rust": 12511539,
+  "c": 125891766,
+  "typescript": 36046931,
+  "cpp": 74367230,
+  "lua": 1617776,
+  "java": 96991101,
+  "ruby": 201689,
+  "csharp": 22397213,
+  "go": 72957134,
+  "php": 28578,
+  "kotlin": 3410687,
+  "swift": 357281
+ },
+ "by_split": {
+  "train": 666710557,
+  "test": 6477714,
+  "val": 46470372
+ },
+ "duplicates": {
+  "near": 73799,
+  "exact": 9690
+ }
+}

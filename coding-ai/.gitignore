@@ -1,0 +1,21 @@
+# data and artifacts (reproducible, not source)
+data/raw/
+data/docs/
+data/tokens/
+data/sft/
+data/tokenizer.json
+eval_data/*.gz
+*.bin
+*.pt
+*.safetensors
+checkpoints/*
+!checkpoints/.gitkeep
+logs/*.jsonl
+eval/*.json
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+logs/*.log
+logs/*.out
