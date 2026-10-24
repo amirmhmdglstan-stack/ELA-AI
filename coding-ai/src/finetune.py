@@ -78,7 +78,10 @@ class SFTDataset:
         for i, (p, r) in enumerate(samples):
             seq = p + r
             x[i, :len(seq)] = torch.tensor(seq, dtype=torch.long)
-            y[i, len(p) - 1:len(seq) - 1] = torch.tensor(seq[len(p) - 1:-1], dtype=torch.long)
+            # teacher forcing: label at position t is the token at position t+1.
+            # The first supervised position is the one that predicts the first
+            # response token, i.e. position len(p)-1 -> seq[len(p)].
+            y[i, len(p) - 1:len(seq) - 1] = torch.tensor(seq[len(p):], dtype=torch.long)
             mask[i, :len(seq)] = 1
         # do not predict padding
         y[mask == 0] = -100
@@ -114,10 +117,13 @@ def main():
     torch.set_num_threads(int(raw.get("num_threads", 2)))
     model.to(device)
 
-    train_ds = SFTDataset(args.data, tok, cfg.max_seq_len, seed=int(raw.get("seed", 7)))
+    data_seq_len = min(cfg.max_seq_len, int(raw.get("max_seq_len", cfg.max_seq_len)))
+    print(f"[sft] examples are packed to at most {data_seq_len} tokens "
+          f"(model context {cfg.max_seq_len})")
+    train_ds = SFTDataset(args.data, tok, data_seq_len, seed=int(raw.get("seed", 7)))
     val_ds = None
     if Path(args.val_data).exists():
-        val_ds = SFTDataset(args.val_data, tok, cfg.max_seq_len, seed=99)
+        val_ds = SFTDataset(args.val_data, tok, data_seq_len, seed=99)
     print(f"[sft] train examples={len(train_ds)} (skipped {train_ds.skipped}) "
           f"val examples={len(val_ds) if val_ds else 0}")
 

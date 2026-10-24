@@ -283,6 +283,7 @@ def main():
     print(f"authored concept examples: {len(examples)}")
 
     py_files = js_files = 0
+    last_report = -1
     for rec in load_train_records():
         if len(examples) >= args.max_examples:
             break
@@ -294,7 +295,8 @@ def main():
             js_files += 1
             if rng.random() < 0.15:
                 examples.extend(jsdoc_examples(rec))
-        if (py_files + js_files) % 1000 == 0:
+        if (py_files + js_files) % 1000 == 0 and (py_files + js_files) != last_report:
+            last_report = py_files + js_files
             print(f"  scanned {py_files} py / {js_files} js files, {len(examples)} examples",
                   flush=True)
 

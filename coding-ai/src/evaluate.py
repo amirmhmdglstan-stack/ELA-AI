@@ -50,11 +50,12 @@ RESULTS = ROOT / "eval"
 @torch.no_grad()
 def suite_perplexity(model, tok, cfg) -> dict:
     from train import TokenDataset
-    val_files = sorted((ROOT / "data/tokens").glob("val-*.bin"))
+    val_files = sorted((ROOT / "data/tokens").glob("val*.bin"))
     if not val_files:
         return {"error": "no validation tokens found (run prepare_data.py tokenize)"}
-    ds = TokenDataset([str(p) for p in val_files], cfg.max_seq_len, seed=1234)
-    n_batches = min(50, max(4, ds.total // (cfg.max_seq_len * 4)))
+    seq_len = min(512, cfg.max_seq_len)      # match the training window for comparability
+    ds = TokenDataset([str(p) for p in val_files], seq_len, seed=1234)
+    n_batches = min(50, max(4, ds.total // (seq_len * 4)))
     losses, n_tokens = [], 0
     for _ in range(n_batches):
         x, y = ds.get_batch(4)
@@ -62,11 +63,12 @@ def suite_perplexity(model, tok, cfg) -> dict:
         losses.append(loss.item())
         n_tokens += y.numel()
     mean_loss = float(np.mean(losses))
-    # bits per byte is tokenizer-independent: total loss / ln2 / bytes covered
-    raw = np.concatenate([np.asarray(np.memmap(p, dtype=np.uint16, mode="r")[:200_000])
+    # bits per byte is tokenizer-independent: (loss / ln2) / bytes-per-token
+    raw = np.concatenate([np.asarray(np.memmap(p, dtype=np.uint16, mode="r")[:100_000])
                           for p in val_files])
-    chars = sum(len(tok.decode([int(i)])) for i in raw[:5000])
-    bpb = mean_loss / math.log(2) * (5000 / max(1, chars))
+    sample_text = tok.decode([int(i) for i in raw[:5000]])
+    n_bytes = max(1, len(sample_text.encode("utf-8")))
+    bpb = mean_loss / math.log(2) * (len(raw[:5000]) / n_bytes)
     return {"val_loss": round(mean_loss, 4), "val_ppl": round(math.exp(min(20, mean_loss)), 3),
             "bits_per_byte": round(bpb, 4), "batches": n_batches, "tokens": n_tokens}
 
@@ -117,6 +119,21 @@ def python_syntax_ok(code: str) -> bool:
         return False
 
 
+def python_syntax_ok_repaired(code: str, max_drop_lines: int = 4) -> bool:
+    """Syntax check tolerant of a generation that was cut off mid-statement.
+
+    Generated samples are truncated at a token budget, which very often leaves an
+    unterminated string/bracket/block.  Dropping up to four trailing lines
+    separates "the model wrote broken syntax" from "we stopped it mid-token".
+    """
+    lines = code.split("\n")
+    for drop in range(max_drop_lines + 1):
+        candidate = "\n".join(lines[:len(lines) - drop]) + "\n"
+        if python_syntax_ok(candidate):
+            return True
+    return False
+
+
 def js_syntax_ok(code: str) -> bool | None:
     node = _which("node")
     if not node:
@@ -160,19 +177,22 @@ def _which(cmd: str) -> str | None:
 
 def suite_syntax(model, tok, k: int = 3) -> dict:
     prompts = held_out_prompts(24)
-    results = {"python_ok": 0, "python_n": 0, "examples": []}
+    results = {"python_ok": 0, "python_ok_repaired": 0, "python_n": 0, "examples": []}
     for p in prompts:
         for _ in range(k):
-            out = complete(model, tok, tok.encode(p["prompt"]), max_new_tokens=96,
+            out = complete(model, tok, tok.encode(p["prompt"]), max_new_tokens=160,
                            temperature=0.6, top_k=40, top_p=0.95, seed=None)
             code = p["prompt"] + out["text"]
             results["python_n"] += 1
             ok = python_syntax_ok(code.split("\n\n\ndef ")[0].rstrip() + "\n")
             results["python_ok"] += int(ok)
+            results["python_ok_repaired"] += int(python_syntax_ok_repaired(code))
             if len(results["examples"]) < 4:
                 results["examples"].append({"prompt": p["prompt"], "completion": out["text"],
                                             "syntax_ok": bool(ok)})
     results["python_syntax_rate"] = round(results["python_ok"] / max(1, results["python_n"]), 3)
+    results["python_syntax_rate_repaired"] = round(
+        results["python_ok_repaired"] / max(1, results["python_n"]), 3)
     # Other languages: single sample per prompt for cheap syntax checks
     for lang, ext, checker in (("javascript", ".js", js_syntax_ok), ("c", ".c", c_syntax_ok)):
         samples = [r for r in _iter_val_records(lang, 6)]
@@ -346,6 +366,8 @@ def main():
                     choices=["all", "ppl", "syntax", "completion", "humaneval", "speed"])
     ap.add_argument("--device", default=None)
     ap.add_argument("--humaneval-limit", type=int, default=None)
+    ap.add_argument("--humaneval-temperature", type=float, default=0.0)
+    ap.add_argument("--humaneval-samples", type=int, default=1)
     ap.add_argument("--out", default=str(RESULTS / "results.json"))
     args = ap.parse_args()
 
@@ -372,7 +394,9 @@ def main():
         elif s == "completion":
             results["completion"] = suite_completion(model, tok)
         elif s == "humaneval":
-            results["humaneval"] = suite_humaneval(model, tok, args.humaneval_limit)
+            results["humaneval"] = suite_humaneval(
+                model, tok, args.humaneval_limit,
+                temperature=args.humaneval_temperature, n_samples=args.humaneval_samples)
         print(f"[eval] {s} done in {time.time()-t0:.0f}s: "
               f"{ {k: v for k, v in results[s if s != 'ppl' else 'perplexity'].items() if not isinstance(v, list)} }",
               flush=True)

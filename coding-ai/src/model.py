@@ -359,3 +359,30 @@ def count_parameters(cfg: ModelConfig) -> dict:
     non_emb = m.num_params(non_embedding=True)
     del m
     return {"total": total, "non_embedding": non_emb}
+
+
+if __name__ == "__main__":  # `python src/model.py` prints the model card
+    import json
+    import sys
+
+    cfg = ModelConfig()
+    if len(sys.argv) > 1 and sys.argv[1].endswith(".yaml"):
+        import yaml
+        raw = yaml.safe_load(open(sys.argv[1]))
+        cfg = ModelConfig(**raw.get("model", {}))
+    m = GPT(cfg)
+    per_layer = cfg.n_layers and (m.blocks[0].attn.q_proj.weight.numel() * 3
+                                  + m.blocks[0].attn.o_proj.weight.numel()
+                                  + sum(p.numel() for p in m.blocks[0].mlp.parameters())
+                                  + sum(p.numel() for p in m.blocks[0].norm1.parameters())
+                                  + sum(p.numel() for p in m.blocks[0].norm2.parameters()))
+    print(json.dumps({
+        "config": cfg.to_dict(),
+        "parameters_total": m.num_params(),
+        "parameters_non_embedding": m.num_params(non_embedding=True),
+        "parameters_per_layer": per_layer,
+        "embedding_parameters": cfg.vocab_size * cfg.d_model,
+        "kv_cache_bytes_per_1024_tokens": 2 * cfg.n_layers * cfg.n_kv_heads * cfg.head_dim * 1024 * 4,
+        "fp32_checkpoint_mb": round(m.num_params() * 4 / 1e6, 1),
+        "fp16_checkpoint_mb": round(m.num_params() * 2 / 1e6, 1),
+    }, indent=1))

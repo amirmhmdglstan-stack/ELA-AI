@@ -37,13 +37,15 @@ def detect_checkpoint(explicit: str | None) -> Path:
 
 class Assistant:
     def __init__(self, model, tokenizer, system=chatfmt.DEFAULT_SYSTEM,
-                 temperature=0.7, top_k=40, top_p=0.95, max_new_tokens=256, seed=None):
+                 temperature=0.5, top_k=40, top_p=0.9, max_new_tokens=256, seed=None,
+                 repetition_penalty=1.15):
         self.model, self.tok = model, tokenizer
         self.system = system
         self.temperature = temperature
         self.top_k, self.top_p = top_k, top_p
         self.max_new_tokens = max_new_tokens
         self.seed = seed
+        self.repetition_penalty = repetition_penalty
         self.history: list[dict] = []
 
     def reset(self):
@@ -69,6 +71,7 @@ class Assistant:
             idx, max_new_tokens=min(self.max_new_tokens, max_ctx - len(ids)),
             temperature=self.temperature, top_k=self.top_k, top_p=self.top_p,
             stop_token_ids=stop_ids, generator=gen,
+            repetition_penalty=self.repetition_penalty,
         )
         new_ids = out[0, len(ids):].tolist()
         text = self.tok.decode(new_ids, skip_special=True).strip()
@@ -90,7 +93,7 @@ def main():
     ap.add_argument("--tokenizer", default=str(ROOT / "data/tokenizer.json"))
     ap.add_argument("--device", default=None)
     ap.add_argument("--dtype", default="float32", choices=["float32", "float16", "bfloat16"])
-    ap.add_argument("--temperature", type=float, default=0.7)
+    ap.add_argument("--temperature", type=float, default=0.5)
     ap.add_argument("--top-k", type=int, default=40)
     ap.add_argument("--top-p", type=float, default=0.95)
     ap.add_argument("--max-new-tokens", type=int, default=256)

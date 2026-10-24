@@ -1,0 +1,38 @@
+# Short fill-in-the-middle adaptation stage (resume from the pretrained model).
+# ~120 steps * 18432 tokens = 2.2M tokens, ~30 minutes on 2 CPU cores.
+run_name: pretrain_fim
+model:
+  vocab_size: 16384
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  n_kv_heads: 6
+  d_ff: 1024
+  max_seq_len: 1024
+  rope_theta: 10000.0
+  norm_eps: 1.0e-5
+  dropout: 0.0
+  tie_embeddings: true
+  use_sdpa: false
+data:
+  train_files:
+    - data/tokens/fim.bin
+  val_files:
+    - data/tokens/val.bin
+train_seq_len: 1024
+batch_size: 2
+grad_accum: 9
+lr: 1.2e-4
+min_lr: 5.0e-5
+weight_decay: 0.1
+warmup_steps: 20
+max_steps: 120
+eval_every: 100
+eval_batches: 8
+save_every: 40
+keep_last: 2
+log_every: 10
+seed: 99
+num_threads: 2
+out_dir: checkpoints/fim
+log_dir: logs

@@ -8,7 +8,33 @@ updated by our own training loop on a curated, license-verified corpus.
 > **Read `docs/TRAINING_REPORT.md` before forming expectations.** A model of this size
 > (≈17 M parameters) trained on a CPU for a few hours learns the *shape* of code —
 > indentation, common syntax, idioms, short functions, completions — but it is nowhere
-> near a modern assistant. The report contains the measured numbers, good and bad.
+> near a modern assistant. Measured: held-out perplexity **25.25**, 1.409 bits/byte,
+> Python syntax validity 34.7 % strict / 70.8 % ignoring truncated tails,
+> **HumanEval pass@1 = 0/164**, 164–190 tokens/s on two CPU cores.
+
+## What it can and cannot do
+
+| Works reasonably | Does not work |
+|---|---|
+| continuing a function signature into syntactically plausible Python/JS | solving programming problems (HumanEval 0/164) |
+| producing idiomatic structure: decorators, imports, docstrings, class bodies | writing semantically correct logic |
+| short completions with the local conventions of the corpus | long-range planning, refactoring, debugging |
+| answering in the chat format after instruction tuning | reliable explanations or multi-turn reasoning |
+
+Representative output (base model, temp 0.5, repetition penalty 1.15):
+
+```python
+def bubble_sort(arr):
+    """Sort a list in place using bubble sort."""
+    return [1, 2, 3, 5]
+
+
+@pytest.mark.parametrize("func", "func", "str", "func")
+def test_all_all_not_from_list():
+    # Check that the last time is set with an array of input, it will be set
+```
+
+Syntactically plausible, semantically wrong. That is the honest capability level.
 
 ---
 
@@ -88,13 +114,26 @@ Sampling controls: `--temperature` (0 = greedy), `--top-k`, `--top-p`,
 
 ## Checkpoints
 
-`checkpoints/` is gitignored (weights are large binaries). The released artifacts are
-described in `docs/TRAINING_REPORT.md`:
+The trained weights are committed as **fp16** files under `release/` (33.8 MB each, they
+load on CPU and GPU; full-precision training checkpoints stay in the gitignored
+`checkpoints/` directory):
 
 ```
-checkpoints/pretrain/best.pt     final base model (used by default)
-checkpoints/pretrain/latest.pt   last checkpoint (resume point)
-checkpoints/sft/best.pt          instruction-tuned variant (if stage 2 quality held up)
+release/coding-ai-17m-base-fp16.pt   base model, 20.28M tokens  (recommended for completion)
+release/coding-ai-17m-fim-fp16.pt    base + fill-in-the-middle adaptation (1024 context)
+release/coding-ai-17m-sft-fp16.pt    instruction-tuned (chat template)
+release/tokenizer.json               the tokenizer trained for this project
+checkpoints/pretrain/best.pt         full fp32 training checkpoint (gitignored)
+checkpoints/pretrain/best_int8.pt    int8 dynamic-quantised, 42 MB, 1.5x faster on CPU
+```
+
+Quick start with the committed weights:
+
+```bash
+python src/chat.py --checkpoint release/coding-ai-17m-sft-fp16.pt \
+                   --tokenizer release/tokenizer.json
+python src/generate.py --checkpoint release/coding-ai-17m-base-fp16.pt \
+                   --tokenizer release/tokenizer.json --prompt "def fib(n):"
 ```
 
 Resume training exactly where it stopped:
@@ -103,17 +142,28 @@ Resume training exactly where it stopped:
 python src/train.py --config configs/pretrain.yaml --resume checkpoints/pretrain/latest.pt
 ```
 
+Recreate a release artefact from a training checkpoint:
+
+```bash
+python scripts/export_checkpoint.py --src checkpoints/pretrain/best.pt \
+    --dst release/coding-ai-17m-base-fp16.pt --fp16
+python scripts/quantize.py --src checkpoints/pretrain/best.pt \
+    --dst checkpoints/pretrain/best_int8.pt
+```
+
 ## Repository layout
 
 ```text
 coding-ai/
-  configs/            pretrain.yaml, sft.yaml
+  configs/            pretrain.yaml, pretrain_fim.yaml, sft.yaml
   src/                model, tokenizer, data, train, finetune, generate, chat, evaluate
   scripts/            prepare_data.py, check_environment.py, build_sft_data.py, smoke_test.py
   tests/              pytest suite
   docs/               TECHNICAL_PLAN.md, DATA_SOURCES.md, TRAINING_REPORT.md
   data/               (gitignored) downloaded corpora, tokenizer, packed tokens
-  checkpoints/        (gitignored) trained weights
+  checkpoints/        (gitignored) training checkpoints, optimizer states
+  release/            committed fp16 weights + tokenizer (inference-ready)
+  eval/               evaluation results and sample generations
 ```
 
 ## Licence

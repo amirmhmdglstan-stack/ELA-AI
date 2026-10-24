@@ -53,6 +53,26 @@ class TokenDataset:
         self.p_choose = np.array(weights) / sum(weights)
         self.epochs_done = 0
 
+    def make_windows(self, n: int, seed: int = 0) -> list[tuple[int, int]]:
+        """Deterministic window list, so validation is comparable across checkpoints."""
+        rng = np.random.default_rng(seed)
+        wins = []
+        for _ in range(n):
+            i = int(rng.choice(len(self.arrays), p=self.p_choose))
+            start = int(rng.integers(0, self.sizes[i] - self.seq_len - 1))
+            wins.append((i, start))
+        return wins
+
+    def batch_from_windows(self, windows, batch_size: int, index: int):
+        sel = windows[index * batch_size:(index + 1) * batch_size]
+        x = np.empty((len(sel), self.seq_len), dtype=np.int64)
+        y = np.empty((len(sel), self.seq_len), dtype=np.int64)
+        for b, (i, start) in enumerate(sel):
+            chunk = np.asarray(self.arrays[i][start:start + self.seq_len + 1])
+            x[b] = chunk[:-1]
+            y[b] = chunk[1:]
+        return torch.from_numpy(x), torch.from_numpy(y)
+
     def get_batch(self, batch_size: int, generator=None) -> tuple[torch.Tensor, torch.Tensor]:
         x = np.empty((batch_size, self.seq_len), dtype=np.int64)
         y = np.empty((batch_size, self.seq_len), dtype=np.int64)
@@ -97,6 +117,7 @@ class TrainConfig:
     compile: bool = False
     max_minutes: float | None = None
     resume: str | None = None
+    reset_step: bool = False
     out_dir: str = "checkpoints/pretrain"
     log_dir: str = "logs"
 
@@ -129,11 +150,15 @@ def lr_at(step: int, cfg: TrainConfig) -> float:
 # --------------------------------------------------------------------------- #
 
 @torch.no_grad()
-def evaluate(model: GPT, dataset: TokenDataset, cfg: TrainConfig, device) -> tuple[float, float]:
+def evaluate(model: GPT, dataset: TokenDataset, cfg: TrainConfig, device,
+             windows=None) -> tuple[float, float]:
     model.eval()
     losses = []
-    for _ in range(cfg.eval_batches):
-        x, y = dataset.get_batch(cfg.batch_size)
+    for b in range(cfg.eval_batches):
+        if windows is not None:
+            x, y = dataset.batch_from_windows(windows, cfg.batch_size, b)
+        else:
+            x, y = dataset.get_batch(cfg.batch_size)
         x, y = x.to(device), y.to(device)
         _, loss, _ = model(x, targets=y)
         if torch.isfinite(loss):
@@ -214,7 +239,12 @@ def train(cfg: TrainConfig):
 
     step, best_val, tokens_seen, tokens_history = 0, float("inf"), 0, []
     if cfg.resume:
-        ckpt = load_checkpoint(Path(cfg.resume), model, optimizer, device)
+        ckpt = load_checkpoint(Path(cfg.resume), model, None if cfg.reset_step else optimizer, device)
+        if cfg.reset_step:
+            print("[resume] starting a fresh schedule from the resumed weights "
+                  "(step 0, new optimizer state)")
+            ckpt = {**ckpt, "step": 0, "best_val": float("inf"), "tokens_seen": 0,
+                    "tokens_history": []}
         step = ckpt["step"]
         best_val = ckpt.get("best_val", float("inf"))
         tokens_seen = ckpt.get("tokens_seen", 0)
@@ -223,6 +253,8 @@ def train(cfg: TrainConfig):
             np.random.set_state(ckpt["numpy_rng"])
         print(f"[resume] step={step} tokens={tokens_seen/1e6:.2f}M best_val={best_val:.4f}")
 
+    val_windows = (val_ds.make_windows(cfg.eval_batches * cfg.batch_size, seed=12345)
+                   if val_ds is not None else None)
     tokens_per_step = cfg.batch_size * seq_len * cfg.grad_accum
     print(f"[init] model={cfg.run_name} params={n_params/1e6:.2f}M "
           f"layers={cfg.model.n_layers} d_model={cfg.model.d_model} "
@@ -309,7 +341,7 @@ def train(cfg: TrainConfig):
 
         if val_ds is not None and (step % cfg.eval_every == 0 or step == cfg.max_steps):
             t_eval = time.time()
-            val_loss, ppl = evaluate(model, val_ds, cfg, device)
+            val_loss, ppl = evaluate(model, val_ds, cfg, device, val_windows)
             print(f"  [val] step {step} loss {val_loss:.4f} ppl {ppl:.2f} "
                   f"({time.time()-t_eval:.1f}s)", flush=True)
             log_file.write(json.dumps({"step": step, "val_loss": round(val_loss, 4),
@@ -353,12 +385,16 @@ def main():
     ap.add_argument("--max-minutes", type=float, default=None)
     ap.add_argument("--run-name", default=None)
     ap.add_argument("--lr", type=float, default=None)
+    ap.add_argument("--reset-step", action="store_true",
+                    help="load weights but start a new schedule (new training stage)")
     ap.add_argument("--seq-len", type=int, default=None,
                     help="override the training sequence length (context-extension stage)")
     args = ap.parse_args()
     cfg = load_config(args.config)
     if args.resume is not None:
         cfg.resume = args.resume
+    if args.reset_step:
+        cfg.reset_step = True
     if args.max_steps is not None:
         cfg.max_steps = args.max_steps
     if args.max_minutes is not None:

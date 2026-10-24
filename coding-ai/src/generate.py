@@ -48,6 +48,22 @@ def load_model(ckpt_path: str | Path = DEFAULT_CKPT, device: str | None = None,
         raise ModelLoadError(f"{ckpt_path} is not a checkpoint produced by this project")
     cfg = ModelConfig.from_dict(ckpt["model_config"])
     model = GPT(cfg)
+    if ckpt.get("quantized"):
+        # dynamic-int8 checkpoints keep quantised Linear modules, so the module
+        # has to be quantised before its state dict can be loaded
+        if device is not None and str(device).startswith("cuda"):
+            raise ModelLoadError("int8 checkpoints are CPU-only; use the fp32/fp16 weights on GPU")
+        model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+        model.load_state_dict(ckpt["model"])
+        model.eval()
+        device = "cpu"
+        tokenizer_path = Path(tokenizer_path)
+        if not tokenizer_path.exists():
+            raise ModelLoadError(f"tokenizer not found: {tokenizer_path}")
+        tok = BPETokenizer.load(tokenizer_path)
+        meta = {"step": ckpt.get("step"), "tokens_seen": ckpt.get("tokens_seen"),
+                "best_val": ckpt.get("best_val"), "path": str(ckpt_path), "quantized": "int8"}
+        return model, tok, meta
     model.load_state_dict(ckpt["model"])
     model.eval()
 
@@ -125,10 +141,10 @@ def main():
     ap.add_argument("--prefix", default=None)
     ap.add_argument("--suffix", default="")
     ap.add_argument("--max-new-tokens", type=int, default=128)
-    ap.add_argument("--temperature", type=float, default=0.8)
+    ap.add_argument("--temperature", type=float, default=0.5)
     ap.add_argument("--top-k", type=int, default=40)
-    ap.add_argument("--top-p", type=float, default=0.95)
-    ap.add_argument("--repetition-penalty", type=float, default=1.0)
+    ap.add_argument("--top-p", type=float, default=0.9)
+    ap.add_argument("--repetition-penalty", type=float, default=1.15)
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--device", default=None)
     ap.add_argument("--dtype", default="float32", choices=["float32", "float16", "bfloat16"])

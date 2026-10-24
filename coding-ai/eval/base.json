@@ -1,0 +1,29 @@
+{
+ "checkpoint": "checkpoints/pretrain/best.pt",
+ "model_meta": {
+  "step": "1100",
+  "tokens_seen": "20275200",
+  "best_val": "2.9164758920669556",
+  "path": "checkpoints/pretrain/best.pt"
+ },
+ "params": 16913280,
+ "timestamp": "2026-10-24T01:04:39Z",
+ "perplexity": {
+  "val_loss": 3.2288,
+  "val_ppl": 25.25,
+  "bits_per_byte": 1.409,
+  "batches": 50,
+  "tokens": 102400
+ },
+ "speed": {
+  "device": "cpu",
+  "prompt_tokens": 64,
+  "new_tokens": 128,
+  "decode_tokens_per_s": 189.5,
+  "total_seconds_128": 0.68,
+  "prefill_plus_32_s": 0.22,
+  "peak_rss_gb": 0.67,
+  "peak_vram_gb": null,
+  "params_millions": 16.91
+ }
+}

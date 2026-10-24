@@ -38,15 +38,19 @@ def main():
     model.load_state_dict(ckpt["model"])
     model.eval()
 
-    # Reference loss on random tokens before/after quantisation.
-    torch.manual_seed(0)
-    x = torch.randint(0, cfg.vocab_size, (2, args.seq_len))
+    # Reference loss on real held-out code before/after quantisation.
+    import numpy as np
+    from train import TokenDataset
+    val = sorted((ROOT / "data/tokens").glob("val*.bin"))
+    ds = TokenDataset([str(p) for p in val], args.seq_len, seed=3)
+    windows = ds.make_windows(8, seed=7)
+    x, y = ds.batch_from_windows(windows, 4, 0)
     with torch.no_grad():
-        _, loss_fp32, _ = model(x, targets=x)
+        _, loss_fp32, _ = model(x, targets=y)
 
     quantized = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
     with torch.no_grad():
-        _, loss_int8, _ = quantized(x, targets=x)
+        _, loss_int8, _ = quantized(x, targets=y)
 
     torch.save({"model": quantized.state_dict(), "model_config": ckpt["model_config"],
                 "step": ckpt.get("step"), "best_val": ckpt.get("best_val"),
