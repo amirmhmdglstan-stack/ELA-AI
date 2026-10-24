@@ -49,7 +49,7 @@ Syntactically plausible, semantically wrong. That is the honest capability level
 | Instruction tuning | `src/finetune.py`, `configs/sft.yaml` | chat template with prompt-masked loss |
 | Inference | `src/generate.py`, `src/chat.py` | CLI completion, FIM completion, interactive chat, CPU/GPU |
 | Evaluation | `src/evaluate.py` | perplexity/bits-per-byte, syntax validity, HumanEval pass@1, completion metrics, speed |
-| Tests | `tests/` | 30 unit tests covering model, tokenizer, generation, checkpoints |
+| Tests | `tests/` | 40 unit tests covering model, tokenizer, generation, checkpoints, data filters and SFT label alignment |
 
 ## Model card
 
