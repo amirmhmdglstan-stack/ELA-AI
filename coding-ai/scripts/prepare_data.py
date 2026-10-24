@@ -62,16 +62,43 @@ def log(msg: str):
 # --------------------------------------------------------------------------- #
 
 def _gh_api(path: str) -> dict | None:
-    """Call the GitHub API with the CLI token when available."""
+    """Fetch repository metadata.
+
+    Uses the ``gh`` CLI when it is installed (higher rate limit), otherwise the
+    public REST API with ``urllib``.  Returns None if neither works, in which
+    case the caller falls back to probing the default branch directly.
+    """
     import subprocess
     try:
-        out = subprocess.run(
-            ["gh", "api", path], capture_output=True, text=True, timeout=60
-        )
+        out = subprocess.run(["gh", "api", path], capture_output=True, text=True, timeout=60)
         if out.returncode == 0:
             return json.loads(out.stdout)
+    except (FileNotFoundError, subprocess.SubprocessError):
+        pass
     except Exception:
         pass
+    try:
+        req = urllib.request.Request(
+            f"https://api.github.com/{path}",
+            headers={"Accept": "application/vnd.github+json", "User-Agent": "coding-ai-dataprep"},
+        )
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except Exception:
+        return None
+
+
+def _probe_tarball_url(repo: str) -> tuple[str, str] | None:
+    """Find a downloadable archive without the API (tries main, then master, then HEAD)."""
+    for branch in ("main", "master"):
+        url = f"https://codeload.github.com/{repo}/tar.gz/refs/heads/{branch}"
+        req = urllib.request.Request(url, method="HEAD")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                if r.status == 200:
+                    return url, branch
+        except Exception:
+            continue
     return None
 
 
@@ -84,14 +111,20 @@ def fetch_repo(entry: tuple[str, str, str]) -> dict:
 
     info = _gh_api(f"repos/{repo}")
     if info is None:
-        meta["status"] = "api_error"
-        return meta
-    meta["default_branch"] = info.get("default_branch", "main")
-    meta["size_kb"] = info.get("size", 0)
-    meta["stars"] = info.get("stargazers_count", 0)
-    meta["archived"] = info.get("archived", False)
+        probed = _probe_tarball_url(repo)
+        if probed is None:
+            meta["status"] = "api_error"
+            return meta
+        meta["default_branch"] = probed[1]
+        meta["archive_url"] = probed[0]
+    else:
+        meta["default_branch"] = info.get("default_branch", "main")
+        meta["size_kb"] = info.get("size", 0)
+        meta["stars"] = info.get("stargazers_count", 0)
+        meta["archived"] = info.get("archived", False)
     if not out_path.exists():
-        url = f"https://codeload.github.com/{repo}/tar.gz/refs/heads/{meta['default_branch']}"
+        url = meta.get("archive_url") or (
+            f"https://codeload.github.com/{repo}/tar.gz/refs/heads/{meta['default_branch']}")
         try:
             with urllib.request.urlopen(url, timeout=300) as r:
                 length = int(r.headers.get("Content-Length") or 0)
