@@ -5,6 +5,7 @@ data/tokens/
 data/sft/
 data/tokenizer.json
 eval_data/*.gz
+!eval_data/HumanEval.jsonl.gz
 *.bin
 *.pt
 !release/*.pt
