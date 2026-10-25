@@ -1,0 +1,115 @@
+{
+ "checkpoint": "checkpoints/pretrain/best.pt",
+ "model_meta": {
+  "step": "1100",
+  "tokens_seen": "20275200",
+  "best_val": "2.9164758920669556",
+  "path": "checkpoints/pretrain/best.pt"
+ },
+ "params": 16913280,
+ "timestamp": "2026-10-24T02:37:44Z",
+ "perplexity": {
+  "val_loss": 3.2288,
+  "val_ppl": 25.25,
+  "bits_per_byte": 1.409,
+  "batches": 50,
+  "tokens": 102400
+ },
+ "speed": {
+  "device": "cpu",
+  "prompt_tokens": 64,
+  "new_tokens": 128,
+  "decode_tokens_per_s": 164.2,
+  "total_seconds_128": 0.78,
+  "prefill_plus_32_s": 0.19,
+  "peak_rss_gb": 0.98,
+  "peak_vram_gb": null,
+  "params_millions": 16.91
+ },
+ "syntax": {
+  "python_ok": 25,
+  "python_n": 72,
+  "examples": [
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    assert output == 'no_git_output'\n    assert input == 'no_git_output'\n    assert input == 'no_test_output_1'\n    assert input == 'no_test_output_1'\n    assert input == 'no_test_result'\n    assert input == 'no_test_output_1'\n    assert array == 'no_test_output_1'\n    assert array ==",
+    "syntax_ok": false
+   },
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    print(output)\n    print(output)\n    print(output)\n    print(output)\n\n\ndef test_output_name(test_dir: str) -> str:\n    env = get_dir()\n    dir = get_dir()\n    dir = get_dir()\n    path = get_dir()\n    file = get_dir()\n    file = get_dir()\n    file = get_",
+    "syntax_ok": true
+   },
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    assert len(cmd) == '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+    "syntax_ok": false
+   },
+   {
+    "prompt": "def main():\n    test_exe, = sys.argv[1:]\n",
+    "completion": "    assert str(d.path) == len(d.read)\n    assert len(d.name) == 0\n    assert len(d.name) == 0\n\n\ndef test_async_with_with_with_with_with_with_from_with_with_with_with_with_with_with_with_with_with_with_with_with_with_not_with_with_with_with",
+    "syntax_ok": true
+   }
+  ],
+  "python_syntax_rate": 0.347,
+  "javascript_syntax_rate": 0.833,
+  "javascript_n": 6,
+  "c_syntax_rate": 0.0,
+  "c_n": 6
+ },
+ "completion": {
+  "n": 30,
+  "first_line_exact_match": 0.0,
+  "mean_normalised_edit_distance": 0.793
+ },
+ "humaneval": {
+  "pass@1": 0.0,
+  "passed": 0,
+  "total": 164,
+  "n_samples": 1,
+  "temperature": 0.0,
+  "elapsed_s": 219.3,
+  "failures": [
+   {
+    "task_id": "HumanEval/0",
+    "completion": "    if not isinstance(bytes):\n        raise ValueError(\"Invalid value of bytes\")\n    if not isinstance(bytes):\n        raise ValueError(\"Invalid value of bytes\")\n    if not isinstance(bytes):\n        raise ValueError(\"Invalid value of bytes\")\n    if not isinstance(bytes):\n        raise ValueError(\"Invalid value of bytes\")\n    if not isinstance(bytes):\n        raise ValueError(\"Invalid value of byt",
+    "error": "File \"/tmp/tmp5qgh9j_3/prog.py\", line 41\n    if\n      ^\nSyntaxError: invalid syntax"
+   },
+   {
+    "task_id": "HumanEval/1",
+    "completion": "    if not isinstance(\n        # A string is a string, not a string, not a string,\n        # a string, not a string, not a string,\n        # a string, but it is a string, not a string,\n        # a string, but it is a string, but it is a string,\n        # a string, but it is a string, but it is a string,\n        # a string, but it is a string, but it is a string,\n        # a string, but it is a str",
+    "error": "File \"/tmp/tmp_6q_4xe4/prog.py\", line 19\n    if not isinstance(\n                     ^\nSyntaxError: '(' was never closed"
+   },
+   {
+    "task_id": "HumanEval/2",
+    "completion": "    if not isinstance(number, int):\n        return int(number)\n\n    if not isinstance(number, int):\n        return int(number)\n    return int(number)\n\n",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/tmpsjlwpbls/prog.py\", line 42, in <module>\n    check(truncate_number)\n  File \"/tmp/tmpsjlwpbls/prog.py\", line 37, in check\n    assert candidate(3.5) == 0.5\n           ^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+   },
+   {
+    "task_id": "HumanEval/3",
+    "completion": "    if not isinstance(args, str):\n        raise ValueError(\"Invalid value for a list of input\")\n    return isinstance(args, str):\n        raise ValueError(\"Invalid value for a list of input\")\n    return isinstance(args, str):\n        raise ValueError(\"Invalid value for a list of input\")\n    return isinstance(args, str):\n        raise ValueError(\"Invalid value for a list of input\")\n    return isins",
+    "error": "File \"/tmp/tmp97sdp3dt/prog.py\", line 22\n    return isinstance(args, str):\n                                ^\nSyntaxError: invalid syntax"
+   },
+   {
+    "task_id": "HumanEval/4",
+    "completion": "    if len(shape) < 0:\n        return (\n            (x)\n        else:\n            return (\n                (x)\n    )\n\n",
+    "error": "File \"/tmp/tmpn9xg4ecs/prog.py\", line 21\n    return (\n           ^\nSyntaxError: '(' was never closed"
+   },
+   {
+    "task_id": "HumanEval/5",
+    "completion": "    if len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len))))))))))\n    >>> int(len(len(len(len(len(len(len(len))))))))\n    >>> int(len(len(len(len(len(len(len))))))))\n    >>> int(len(len(len(len(len(len))))))))\n    >>> int(len(len(len(len",
+    "error": "File \"/tmp/tmpb8o892d2/prog.py\", line 18\n    if len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len))))))))))\n                              "
+   },
+   {
+    "task_id": "HumanEval/6",
+    "completion": "    if not isinstance(str, str):\n        return str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(",
+    "error": "(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(str(\n                                                                                                                                                                                                                              "
+   },
+   {
+    "task_id": "HumanEval/7",
+    "completion": "    if not isinstance(schema, str):\n        raise ValueError(\n            'A string is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None:",
+    "error": "t None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} is not None: {str} i"
+   }
+  ]
+ }
+}

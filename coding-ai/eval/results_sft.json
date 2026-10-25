@@ -1,0 +1,117 @@
+{
+ "checkpoint": "checkpoints/sft/best.pt",
+ "model_meta": {
+  "step": "300",
+  "tokens_seen": "172800",
+  "best_val": "2.3707801520824434",
+  "path": "checkpoints/sft/best.pt"
+ },
+ "params": 16913280,
+ "timestamp": "2026-10-24T02:46:19Z",
+ "perplexity": {
+  "val_loss": 3.4817,
+  "val_ppl": 32.516,
+  "bits_per_byte": 1.5194,
+  "batches": 50,
+  "tokens": 102400
+ },
+ "speed": {
+  "device": "cpu",
+  "prompt_tokens": 64,
+  "new_tokens": 128,
+  "decode_tokens_per_s": 188.9,
+  "total_seconds_128": 0.68,
+  "prefill_plus_32_s": 0.19,
+  "peak_rss_gb": 0.93,
+  "peak_vram_gb": null,
+  "params_millions": 16.91
+ },
+ "syntax": {
+  "python_ok": 20,
+  "python_ok_repaired": 51,
+  "python_n": 72,
+  "examples": [
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    print('git subtree', '--build')\n    print('--test-file', '--build')\n    print('git subtree', '--build')\n    print('\" 'git subtree', '--build')",
+    "syntax_ok": false
+   },
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    for tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick, tick",
+    "syntax_ok": false
+   },
+   {
+    "prompt": "def get_test_output(test_exe: str, sections: bool) -> List[str]:\n    cmd = [test_exe, '--reporter', 'partial']\n",
+    "completion": "    if len(target_dir) == '(target_dir):\n        err = '--if not'\n        if target_dir[0] == '(target_dir) or target_dir[1] == '(target_dir) for target_dir in '(target_dir[1]) if target_dir[1] == '(target_dir[1]) for t in '(target_dir[1]) if target_dir[1] == '(target_dir[1]) for version in '(target_dir[1]) for version in '(target_dir[1] for id in '(target_dir[1]) for target_dir[1] for version in '(target_dir[1",
+    "syntax_ok": false
+   },
+   {
+    "prompt": "def main():\n    test_exe, = sys.argv[1:]\n",
+    "completion": "    # check if the slice is not defined\n    for i, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k,k,k, k,k,k,k, k, k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k",
+    "syntax_ok": false
+   }
+  ],
+  "python_syntax_rate": 0.278,
+  "python_syntax_rate_repaired": 0.708,
+  "javascript_syntax_rate": 0.667,
+  "javascript_n": 6,
+  "c_syntax_rate": 0.0,
+  "c_n": 6
+ },
+ "completion": {
+  "n": 30,
+  "first_line_exact_match": 0.0,
+  "mean_normalised_edit_distance": 0.815
+ },
+ "humaneval": {
+  "pass@1": 0.0,
+  "passed": 0,
+  "total": 164,
+  "n_samples": 1,
+  "temperature": 0.0,
+  "elapsed_s": 125.7,
+  "failures": [
+   {
+    "task_id": "HumanEval/0",
+    "completion": "    if len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(l",
+    "error": "(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(\n                                                                                                                                                                                                                                              "
+   },
+   {
+    "task_id": "HumanEval/1",
+    "completion": "    if (\n        (\n            (\n                (\n                    (\n                    (\n                    (\n                    (\n                    (\n                    (\n                    (\n                    (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((",
+    "error": "File \"/tmp/tmpezg59rdt/prog.py\", line 30\n    (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((\n                                                                                         "
+   },
+   {
+    "task_id": "HumanEval/2",
+    "completion": "    if not isinstance(number, int):\n        return number.lower()\n    return number",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/tmpx1kifhdr/prog.py\", line 37, in <module>\n    check(truncate_number)\n  File \"/tmp/tmpx1kifhdr/prog.py\", line 32, in check\n    assert candidate(3.5) == 0.5\n           ^^^^^^^^^^^^^^\n  File \"/tmp/tmpx1kifhdr/prog.py\", line 20, in truncate_number\n    ret"
+   },
+   {
+    "task_id": "HumanEval/3",
+    "completion": "    if not isinstance(exported, int):\n        return (\n            (exported)\n        )\n    return (\n        (exported) for i in range(1, n_negative)\n    )",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/tmpnigmod5_/prog.py\", line 45, in <module>\n    check(below_zero)\n  File \"/tmp/tmpnigmod5_/prog.py\", line 37, in check\n    assert candidate([]) == False\n           ^^^^^^^^^^^^^\n  File \"/tmp/tmpnigmod5_/prog.py\", line 20, in below_zero\n    if not isinst"
+   },
+   {
+    "task_id": "HumanEval/4",
+    "completion": "    return sum(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(l",
+    "error": "(len(len(len(len(len(len(len(len(len(len(len(len(len(len(\n                                                                                                                                                                                                                                                  "
+   },
+   {
+    "task_id": "HumanEval/5",
+    "completion": "    if not isinstance(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(len(le",
+    "error": "en(len(len(len(len(len(len(len(len(len(len(len(len(len\n                                                                                                                                                                                                                                                     "
+   },
+   {
+    "task_id": "HumanEval/6",
+    "completion": "    return (\n        (1) + 1\n    )",
+    "error": "Traceback (most recent call last):\n  File \"/tmp/tmpje2x9xcy/prog.py\", line 37, in <module>\n    check(parse_nested_parens)\n  File \"/tmp/tmpje2x9xcy/prog.py\", line 32, in check\n    assert candidate('(()()) ((())) () ((())()())') == [2, 3, 1, 3]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+   },
+   {
+    "task_id": "HumanEval/7",
+    "completion": "    if isinstance(strings, list) and len(strings) == 'a':\n        return 'Input'\n    if isinstance(strings, list):\n        return 'Input'\n    if isinstance(strings, list):\n        return 'Input'\n    if isinstance(strings, list):\n        return 'Input'\n    if isinstance(strings, list):\n        return 'Input'\n    if isinstance(strings, list):\n        return 'Input'\n    if isinstance(strings, list):\n",
+    "error": "File \"/tmp/tmpny99balf/prog.py\", line 47\n    METADATA = {\nIndentationError: expected an indented block after 'if' statement on line 42"
+   }
+  ]
+ }
+}

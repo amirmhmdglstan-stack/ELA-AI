@@ -1,0 +1,83 @@
+[
+ {
+  "model": "base (pretrained)",
+  "checkpoint": "checkpoints/pretrain/best.pt",
+  "step": 1100,
+  "samples": [
+   {
+    "kind": "completion",
+    "prompt": "def bubble_sort(arr):\n    \"\"\"Sort a list in place using bubble sort.\"\"\"\n",
+    "text": "    return [1, 2, 3, 5]\n\n\n@pytest.mark.parametrize(\"func\", \"func\", \"str\", \"func\")\ndef test_all_all_not_to_from_list():\n    # Check that the last time is set with an array of input, it will be set\n    # when we have to call the same number as well as an array.\n    assert (\n"
+   },
+   {
+    "kind": "completion",
+    "prompt": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n",
+    "text": "        return self.params\n\n    def get_item_name(self) -> str:\n        return self._item\n\n    def __init__(self, key=None, value=None):\n        return self._item\n\n\nclass Cinder(BaseModel):\n    \"\"\"\n    Returns the number of values to be used for a list.\n    \"\"\"\n\n    def __init__(self, value"
+   },
+   {
+    "kind": "completion",
+    "prompt": "import re\n\ndef slugify(text):\n    \"\"\"Convert text to a URL slug.\"\"\"\n",
+    "text": "    print(text=True)\n    print(\"The file is not supported\")\n    print(\"The file to the command\")\n    print(\"The file is not found\", \"syn-out\" or {output}\")\n    print(\"The file of file and file with the file file\"):\n        print(\"The file that has been removed in file file:\")\n    print(\"The file is a file to be found\")"
+   },
+   {
+    "kind": "javascript",
+    "prompt": "const express = require('express');\nconst app = express();\n\napp.get('/api/users', (req, res) => {\n",
+    "text": "  return new Error(\n    'data-x' +\n      'data-y' +\n      'data-z' +\n      'data-z' +\n        'data-y' +\n        'data-z' +\n        'data-z' +\n          'data-z' +\n          'data-z' +\n          'data-z' +\n            'data-"
+   },
+   {
+    "kind": "cpp",
+    "prompt": "#include <vector>\n#include <string>\n\nstd::string join(const std::vector<std::string>& parts, const std::string& sep) {\n",
+    "text": "  return GetData(format.GetData(), args);\n}\n\n// namespace duckdb"
+   },
+   {
+    "kind": "completion",
+    "prompt": "# Read a CSV file and compute the mean of the 'price' column\nimport csv\n\n",
+    "text": "import bv from 'bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.bt.b"
+   }
+  ]
+ },
+ {
+  "model": "sft (instruction-tuned)",
+  "checkpoint": "checkpoints/sft/best.pt",
+  "step": 300,
+  "samples": [
+   {
+    "kind": "completion",
+    "prompt": "def bubble_sort(arr):\n    \"\"\"Sort a list in place using bubble sort.\"\"\"\n",
+    "text": "    return _get_set_index(arr, npartitions)"
+   },
+   {
+    "kind": "completion",
+    "prompt": "class Stack:\n    def __init__(self):\n        self.items = []\n\n    def push(self, item):\n",
+    "text": "        return self._get_index_data()"
+   },
+   {
+    "kind": "completion",
+    "prompt": "import re\n\ndef slugify(text):\n    \"\"\"Convert text to a URL slug.\"\"\"\n",
+    "text": "    print(text)"
+   },
+   {
+    "kind": "javascript",
+    "prompt": "const express = require('express');\nconst app = express();\n\napp.get('/api/users', (req, res) => {\n",
+    "text": "  return new Error(req, e);\n}"
+   },
+   {
+    "kind": "cpp",
+    "prompt": "#include <vector>\n#include <string>\n\nstd::string join(const std::vector<std::string>& parts, const std::string& sep) {\n",
+    "text": "  return GetData(format.get_name());\n}"
+   },
+   {
+    "kind": "completion",
+    "prompt": "# Read a CSV file and compute the mean of the 'price' column\nimport csv\n\n",
+    "text": "def get_time(\n    num: int,\n    max: int,\n    max: int,\n    total: int,\n    max: int,\n    max: int,\n    return num,\n)"
+   }
+  ]
+ },
+ {
+  "model": "fim",
+  "checkpoint": "checkpoints/fim/best.pt",
+  "step": 120,
+  "fim_prompt": "def add(a, b): <MIDDLE> def test_add(): ...",
+  "fim_output": "\n    assert check(1, 2) == 3\n    assert check(1, 2) == 2\n\n\ndef test_add_subsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsubsub"
+ }
+]

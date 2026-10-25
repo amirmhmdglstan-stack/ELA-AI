@@ -1,0 +1,37 @@
+# Optional context-extension stage: continue training at 1024 tokens.
+run_name: pretrain_extend
+model:
+  vocab_size: 16384
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  n_kv_heads: 6
+  d_ff: 1024
+  max_seq_len: 1024
+  rope_theta: 10000.0
+  norm_eps: 1.0e-5
+  dropout: 0.0
+  tie_embeddings: true
+  use_sdpa: false
+data:
+  train_files:
+    - data/tokens/train.bin
+  val_files:
+    - data/tokens/val.bin
+train_seq_len: 1024
+batch_size: 2          # memory bound: 2*1024*16384 logits is ~0.13 GB per micro-batch
+grad_accum: 9          # 2*1024*9 = 18432 tokens per step, same as the main run
+lr: 1.0e-4
+min_lr: 8.0e-5
+weight_decay: 0.1
+warmup_steps: 10
+max_steps: 120
+eval_every: 60
+eval_batches: 6
+save_every: 40
+keep_last: 2
+log_every: 10
+seed: 7
+num_threads: 2
+out_dir: checkpoints/extend
+log_dir: logs

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coding-ai"
+version = "0.1.0"
+description = "A coding language model built and trained from scratch, sized for a GTX 1060 / 16 GB RAM"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "PyYAML>=6.0",
+    "torch>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["model", "tokenizer", "data", "train", "finetune", "generate", "chat",
+              "chatfmt", "evaluate"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

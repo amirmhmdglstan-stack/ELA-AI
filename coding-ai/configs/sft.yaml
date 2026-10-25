@@ -1,0 +1,17 @@
+# Instruction tuning (stage 2) on top of checkpoints/pretrain/best.pt
+run_name: sft
+tokenizer: data/tokenizer.json
+lr: 1.2e-4
+min_lr: 1.0e-5
+warmup_steps: 20
+max_steps: 300
+max_seq_len: 384     # packed example length (chat turns are short)
+batch_size: 6
+grad_accum: 3
+weight_decay: 0.05
+grad_clip: 1.0
+eval_every: 50
+save_every: 100
+log_every: 10
+seed: 7
+num_threads: 2

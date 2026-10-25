@@ -1,0 +1,41 @@
+# Pretraining configuration for the coding language model.
+# ~17M parameters total (11.9M non-embedding) + 16K vocabulary.
+run_name: pretrain
+model:
+  vocab_size: 16384
+  d_model: 384
+  n_layers: 6
+  n_heads: 6
+  n_kv_heads: 6        # set to 2 for grouped-query attention (smaller KV cache)
+  d_ff: 1024
+  max_seq_len: 1024    # trained at 512 first, then extended (see README)
+  rope_theta: 10000.0
+  norm_eps: 1.0e-5
+  dropout: 0.0
+  tie_embeddings: true
+  use_sdpa: false
+data:
+  train_files:
+    - data/tokens/train.bin
+  val_files:
+    - data/tokens/val.bin
+train_seq_len: 512     # window used for most of training (memory-bound)
+batch_size: 3
+grad_accum: 12         # 3 * 512 * 12 = 18432 tokens per optimizer step
+lr: 7.0e-4
+min_lr: 8.0e-5
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+warmup_steps: 100
+max_steps: 1100
+eval_every: 200
+eval_batches: 10
+save_every: 100
+keep_last: 3
+log_every: 10
+seed: 1337
+num_threads: 2
+out_dir: checkpoints/pretrain
+log_dir: logs
